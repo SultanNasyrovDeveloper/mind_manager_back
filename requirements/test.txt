@@ -1,0 +1,7 @@
+-r prod.txt
+
+pytest=7.2.0
+pytest-django=4.5.*
+factory-boy==3.2.*
+Faker==15.3.*
+

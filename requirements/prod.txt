@@ -1,0 +1,13 @@
+django>=4.0.0
+django-cleanup==5.2.*
+django-cors-headers==3.7.*
+django-filter==2.4.*
+django-mptt==0.12.*
+djangorestframework==3.12.*
+djangorestframework-simplejwt==4.7.*
+psycopg2-binary
+djangorestframework-recursive==0.1.*
+pillow==8.4.*
+djoser==2.1.0
+pyyaml==6.0
+pytz==2022.4
