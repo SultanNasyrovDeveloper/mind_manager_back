@@ -7,21 +7,25 @@ from django.utils import timezone
 from mind_palace.node import models as node_models
 from mind_palace.learning.statistics.models import NodeLearningStatistics
 
+from ..learning.strategy.supermemo2 import SuperMemo2LearningStrategy
+from .queue import get_queue_generation_strategy
+
 
 class UserLearningSessionManager(models.Manager):
 
     def start(self, **session_data):
         """
-        Start new learning session.
+        Start new learning learning_session.
 
         Args:
-            session_data: Field values for new session that will be created.
+            session_data: Field values for new learning_session that will be created.
             Must be validated before. Use UserLearningSessionSerializer.
         """
         targets = session_data.pop('targets')
         session = self.model(**session_data, is_active=True)
         target_nodes = node_models.PalaceNode.objects.filter(id__in=targets)
-        session.queue = session.learning_strategy.generate_queue(target_nodes)
+        queue_strategy = get_queue_generation_strategy(session.queue_generation_strategy)
+        session.queue = queue_strategy().generate(list(target_nodes))
         session.save()
         for target in targets:
             session.targets.add(target)
@@ -33,7 +37,8 @@ class UserLearningSessionManager(models.Manager):
         """
         node_id = kwargs.pop('node')
         node_learning_stats = NodeLearningStatistics.objects.get(node_id=node_id)
-        session.learning_strategy.study_node(node_learning_stats, **kwargs)
+        learning_strategy = SuperMemo2LearningStrategy()
+        learning_strategy.study_node(node_learning_stats, **kwargs)
         session.statistics.average_rating = round((
             (session.statistics.average_rating * (session.statistics.repetitions - 1) + kwargs.get('rating'))
             / session.statistics.repetitions if session.statistics.repetitions else 1
@@ -47,13 +52,12 @@ class UserLearningSessionManager(models.Manager):
 
     def finish(self, session):
         """
-        Finish given session.
+        Finish given learning_session.
         """
         if not session.repeated_nodes:
             session.delete()
             return
         session.queue = list()
-        session.additional_queue = list()
         session.finish_datetime = timezone.now()
         session.is_active = False
         session.save()
@@ -69,15 +73,14 @@ class UserLearningSessionManager(models.Manager):
         sessions.update(
             is_active=False,
             queue=list(),
-            additional_queue=list(),
             finish_datetime=timezone.now()
         )
 
     def finish_expired(self, initial_queryset=None, **query_params) -> None:
         """
-        Finish all expired session filtered by given query params.
+        Finish all expired learning_session filtered by given query params.
 
-        First filter all session by given query parameters then close all expired session among them.
+        First filter all learning_session by given query parameters then close all expired learning_session among them.
 
         Args:
             initial_queryset: Initial sessions queryset.

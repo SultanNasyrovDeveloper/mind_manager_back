@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from mind_palace.node.models import PalaceNode
-from mind_palace.learning.session import models
-from mind_palace.learning.strategy.enums import MindPalaceLearningStrategiesEnum
+from mind_palace.learning_session import models
 
 
 class UserLearningSessionSerializer(serializers.ModelSerializer):
@@ -12,9 +11,6 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
         queryset=PalaceNode.objects.all(),
         many=True
     )
-    strategy_name = serializers.ChoiceField(
-        choices=MindPalaceLearningStrategiesEnum.choices(),
-    )
     current = serializers.SerializerMethodField(
         read_only=True,
         method_name='get_current'
@@ -23,12 +19,12 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserLearningSession
         fields = (
-            'id', 'is_active', 'strategy_name', 'targets', 'user', 'current',
+            'id', 'is_active', 'targets', 'user', 'current', 'queue_generation_strategy',
             'start_datetime', 'finish_datetime', 'last_repetition_datetime',
         )
         read_only_fields = (
             'id', 'is_active', 'start_datetime', 'finish_datetime', 'last_repetition_datetime',
-            'user',b'current', 'targets', 'strategy_name'
+            'user', 'current', 'targets'
         )
 
     def get_current(self, session):
@@ -41,7 +37,7 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
                     if key not in ('targets', )
                 }
             )
-        return session.queue_manager.current()
+        return session.queue[0] if len(session.queue) > 1 else None
 
     def create(self, validated_data):
         session = super().create(validated_data)

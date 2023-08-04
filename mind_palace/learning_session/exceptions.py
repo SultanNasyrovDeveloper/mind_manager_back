@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 class ActiveSessionAlreadyExistsError(ValidationError):
 
-    status_code = status.HTTP_303_SEE_OTHER
+    status_code = status.HTTP_400_BAD_REQUEST
 
 
 class SessionExpiredError(ValidationError):

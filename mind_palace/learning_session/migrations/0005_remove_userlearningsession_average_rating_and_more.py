@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('node', '0003_nodebody_fields'),
-        ('session', '0004_auto_20221117_1349'),
+        ('learning_session', '0004_auto_20221117_1349'),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('average_rating', models.DecimalField(decimal_places=1, default=0, max_digits=2)),
                 ('repeated_nodes', models.IntegerField(default=0)),
-                ('session', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='statistics', to='session.userlearningsession')),
+                ('learning_session', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='statistics', to='learning_session.userlearningsession')),
             ],
         ),
     ]

@@ -5,34 +5,30 @@ from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 
-from mind_palace.learning.session.managers import UserLearningSessionManager
-from mind_palace.learning.session.queue import LearningQueueManager
-from mind_palace.learning.strategy.enums import MindPalaceLearningStrategiesEnum
-from mind_palace.learning.strategy.factory import UserLearningStrategyFactory
+from .enums import QueueGenerationStrategiesEnum
+from .managers import UserLearningSessionManager
 
 
 class UserLearningSession(models.Model):
     """
-    User learning session.
+    User learning learning_session.
     """
     # basic
     is_active = models.BooleanField(default=False)
     user = models.ForeignKey(
         'user.User', on_delete=models.CASCADE, related_name='learning_sessions',
     )
-    strategy_name = models.CharField(
-        max_length=1000, choices=MindPalaceLearningStrategiesEnum.choices(),
-        default=MindPalaceLearningStrategiesEnum.supermemo_2,
-    )
+
     targets = models.ManyToManyField(
         'node.PalaceNode',
         default=list,
         related_name='learning_sessions'
     )
-
-    # nodes
+    queue_generation_strategy = models.IntegerField(
+        choices=QueueGenerationStrategiesEnum.choices(),
+        default=QueueGenerationStrategiesEnum.outdated_first
+    )
     queue = ArrayField(models.IntegerField(), default=list)
-    additional_queue = ArrayField(models.IntegerField(), default=list)
     repeated_nodes = ArrayField(models.IntegerField(), default=list)
 
     # time marks
@@ -41,14 +37,6 @@ class UserLearningSession(models.Model):
     last_repetition_datetime = models.DateTimeField(default=timezone.now)
 
     objects = UserLearningSessionManager()
-
-    @property
-    def learning_strategy(self):
-        return UserLearningStrategyFactory.create(self.strategy_name)
-
-    @property
-    def queue_manager(self):
-        return LearningQueueManager(self)
 
     def is_expired(self):
         is_active = self.is_active

@@ -4,8 +4,8 @@ from django.db import migrations
 
 
 def create_learning_session_statistics(apps, schema_editor):
-    Session = apps.get_model('session', 'UserLearningSession')
-    SessionStatistics = apps.get_model('session', 'LearningSessionStatistics')
+    Session = apps.get_model('learning_session', 'UserLearningSession')
+    SessionStatistics = apps.get_model('learning_session', 'LearningSessionStatistics')
     sessions_without_statistics = Session.objects.filter(statistics=None)
     new_statistics = []
     for session in sessions_without_statistics:
@@ -16,7 +16,7 @@ def create_learning_session_statistics(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('session', '0005_remove_userlearningsession_average_rating_and_more'),
+        ('learning_session', '0005_remove_userlearningsession_average_rating_and_more'),
     ]
 
     operations = [

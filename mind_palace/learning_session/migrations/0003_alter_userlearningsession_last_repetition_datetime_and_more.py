@@ -6,7 +6,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("session", "0002_initial"),
+        ("learning_session", "0002_initial"),
     ]
 
     operations = [

@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'mind_palace.node',
     'mind_palace.learning',
     'mind_palace.learning.statistics',
-    'mind_palace.learning.session',
+    'mind_palace.learning_session',
     # 'mind_palace.learning.config',
 ]
 
@@ -75,9 +75,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20
 }

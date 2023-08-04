@@ -8,14 +8,14 @@ def delete_all_sessions(apps, schema_editor):
     We can't import the Post model directly as it may be a newer
     version than this migration expects. We use the historical version.
     '''
-    LearningSession = apps.get_model('session', 'UserLearningSession')
+    LearningSession = apps.get_model('learning_session', 'UserLearningSession')
     LearningSession.objects.all().delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('session', '0003_alter_userlearningsession_last_repetition_datetime_and_more'),
+        ('learning_session', '0003_alter_userlearningsession_last_repetition_datetime_and_more'),
     ]
 
     operations = [

@@ -1,9 +1,9 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 import pytest
 
-from mind_palace.learning.session import models, managers
-from mind_palace.learning.strategy.enums import MindPalaceLearningStrategiesEnum
+from mind_palace.learning_session import models
+from mind_palace.learning.strategy.enums import LearningStrategiesEnum
 
 
 @pytest.mark.django_db
@@ -18,7 +18,7 @@ def test_finish_expired(user, user_mind_palace):
         session = models.UserLearningSession.objects.create(
             is_active=True,
             user_id=user.id,
-            strategy_name=MindPalaceLearningStrategiesEnum.supermemo_2,
+            strategy_name=LearningStrategiesEnum.supermemo_2,
             start_datetime=datetime.utcnow() - timedelta(days=100, hours=index),
             last_repetition_datetime=datetime.utcnow() - timedelta(days=100, minutes=index)
         )
@@ -27,7 +27,7 @@ def test_finish_expired(user, user_mind_palace):
     active_session = models.UserLearningSession.objects.create(
         is_active=True,
         user_id=user.id,
-        strategy_name=MindPalaceLearningStrategiesEnum.supermemo_2,
+        strategy_name=LearningStrategiesEnum.supermemo_2,
         start_datetime=datetime.utcnow(),
         last_repetition_datetime=datetime.utcnow()
     )
