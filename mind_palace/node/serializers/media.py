@@ -7,4 +7,4 @@ class NodeMediaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.NodeMedia
-        exclude = ('image', )
+        fields = '__all__'

@@ -15,9 +15,6 @@ class LearningSessionViewSet(ModelViewSet):
     permission_classes = [permissions.IsSessionOwner]
 
     def retrieve(self, request, *args, **kwargs):
-        """
-        Get session detail info. Finishes session if expired.
-        """
         session = self.get_object()
         if session.is_expired():
             models.UserLearningSession.objects.finish(session)
@@ -25,19 +22,9 @@ class LearningSessionViewSet(ModelViewSet):
 
     @action(detail=False, methods=('GET', ))
     def active_session(self, request, *args, **kwargs):
-        """
-        Fetch user active learning_session.
-
-        First finishes all expired learning sessions.
-
-        Returns:
-            response: Response with user learning learning_session object if found else None.
-        """
         response_data = None
         models.UserLearningSession.objects.finish_expired(user_id=request.user.id)
-        target_session = self.queryset.filter(
-            user=request.user.id, is_active=True
-        ).first()
+        target_session = self.queryset.filter(user=request.user.id, is_active=True).first()
         if target_session:
             response_data = self.serializer_class(target_session).data
         return Response(response_data)
@@ -47,23 +34,18 @@ class LearningSessionViewSet(ModelViewSet):
         """
         Start new learning learning_session.
         """
-        models.UserLearningSession.objects.finish_expired(
-            user_id=request.user.id
-        )
+        models.UserLearningSession.objects.finish_expired(user_id=request.user.id)
         active_sessions = models.UserLearningSession.objects.filter(
             is_active=True,
             user_id=request.user.id
         )
         if active_sessions:
-            raise exceptions.ActiveSessionAlreadyExistsError(
-                'You can not create new learning learning_session. First finish current learning_session.'
-            )
-        serializer = self.serializer_class(data=request.data)
+            raise exceptions.ActiveSessionAlreadyExistsError()
+        session_data = dict(request.data)
+        session_data['user'] = request.user.id
+        serializer = self.serializer_class(data=session_data)
         serializer.is_valid(raise_exception=True)
-        session_data = dict(serializer.data)
-        session_data.pop('current')
-        session_data['user_id'] = request.user.id
-        new_session = models.UserLearningSession.objects.start(**session_data)
+        new_session = serializer.save()
         return Response(self.serializer_class(new_session).data)
 
     @action(detail=True, methods=('POST', ))

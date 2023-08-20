@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from mind_palace.node.models import PalaceNode
 from mind_palace.learning_session import models
-
+from mind_palace.user.models import User
 
 class UserLearningSessionSerializer(serializers.ModelSerializer):
 
@@ -14,6 +14,9 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
     current = serializers.SerializerMethodField(
         read_only=True,
         method_name='get_current'
+    )
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
     )
 
     class Meta:
@@ -38,11 +41,6 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
                 }
             )
         return session.queue[0] if len(session.queue) > 1 else None
-
-    def create(self, validated_data):
-        session = super().create(validated_data)
-        models.LearningSessionStatistics.objects.create(session=session)
-        return session
 
 
 class NodeStudyDataSerializer(serializers.Serializer):

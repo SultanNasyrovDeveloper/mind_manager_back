@@ -25,6 +25,7 @@ class MindPalaceNodeSerializer(serializers.ModelSerializer):
     ancestors = serializers.SerializerMethodField(read_only=True)
     statistics = UserLearningStatisticsSerializer(read_only=True)
     media = NodeMediaSerializer(many=True, read_only=True)
+    body = serializers.PrimaryKeyRelatedField(required=False, read_only=True)
 
     class Meta:
         model = models.PalaceNode

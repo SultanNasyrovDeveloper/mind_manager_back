@@ -40,12 +40,22 @@ class MindPalaceNodeViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = dict(request.data)
+        body_data = data.pop('body')
+
         data['owner'] = request.user.id
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        new_node = serializer.save()
+
+        body_data['node'] = new_node.id
+        body_serializer = serializers.NodeBodySerializer(data=body_data)
+        body_serializer.is_valid(raise_exception=True)
+        body_serializer.save()
+
+        return Response(
+            self.serializer_class(new_node).data,
+            status=status.HTTP_201_CREATED
+        )
 
     def update(self, request, *args, **kwargs):
         if 'body' in request.data:

@@ -14,13 +14,10 @@ class NodeMedia(models.Model):
         on_delete=models.CASCADE,
         related_name='media'
     )
-    type = models.CharField(
-        max_length=100,
+    type = models.PositiveSmallIntegerField(
         choices=NodeMediaTypeEnum.choices(),
-        default=NodeMediaTypeEnum.NOT_SET,
+        default=NodeMediaTypeEnum.not_set,
     )
     title = models.CharField(max_length=500, null=True, default=None)
     description = models.TextField(null=True, default=None)
-
-    image = models.ImageField(upload_to='node_media/')
     config = models.JSONField(default=dict)

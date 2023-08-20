@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.db import models
-from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 
@@ -29,7 +28,6 @@ class UserLearningSession(models.Model):
         default=QueueGenerationStrategiesEnum.outdated_first
     )
     queue = ArrayField(models.IntegerField(), default=list)
-    repeated_nodes = ArrayField(models.IntegerField(), default=list)
 
     # time marks
     start_datetime = models.DateTimeField(default=timezone.now)
@@ -44,22 +42,17 @@ class UserLearningSession(models.Model):
         return is_active and is_expired
 
 
-class LearningSessionStatistics(models.Model):
+class NodeRepetition(models.Model):
 
-    session = models.OneToOneField(
+    session = models.ForeignKey(
         UserLearningSession,
         on_delete=models.CASCADE,
-        related_name='statistics'
+        related_name='repetitions'
     )
-    average_rating = models.DecimalField(
-        max_digits=2,
-        decimal_places=1,
-        default=0
+    node = models.ForeignKey(
+        'node.PalaceNode',
+        on_delete=models.CASCADE,
+        related_name='repetitions'
     )
-    repetitions = models.IntegerField(default=0)
-
-
-@receiver(signal=models.signals.post_save, sender=UserLearningSession)
-def create_learning_session_statistics(sender, instance, created, **kwargs):
-    if created:
-        LearningSessionStatistics.objects.create(session=instance)
+    rating = models.PositiveSmallIntegerField(default=0)
+    date = models.DateTimeField(auto_now_add=True)

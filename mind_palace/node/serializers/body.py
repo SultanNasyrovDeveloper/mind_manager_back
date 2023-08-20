@@ -11,8 +11,8 @@ class NodeBodySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.NodeBody
-        fields = ('id', 'type', 'meta', 'data', 'node_id', 'size', 'fields')
-        read_only_fields = ('fields', 'size', 'node_id', 'id')
+        fields = ('id', 'type', 'meta', 'data', 'node', 'size', 'fields')
+        read_only_fields = ('fields', 'size', 'id')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -35,9 +35,6 @@ class NodeBodySerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        """
-        Performs proper node body update.
-        """
         if 'meta' in validated_data:
             validated_data['meta'] = {
                 **instance.meta,

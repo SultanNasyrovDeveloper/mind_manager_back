@@ -54,9 +54,6 @@ class UserLearningSessionManager(models.Manager):
         """
         Finish given learning_session.
         """
-        if not session.repeated_nodes:
-            session.delete()
-            return
         session.queue = list()
         session.finish_datetime = timezone.now()
         session.is_active = False

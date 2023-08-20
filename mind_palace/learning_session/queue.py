@@ -34,7 +34,7 @@ class OutdatedFirstQueueGeneration(QueueGenerationStrategy):
             ))
         return list(
             PalaceNode.objects
-            .filter(statistics__next_repetition__lte=timezone.now())
+            .filter(id__in=nodes_to_queue, statistics__next_repetition__lte=timezone.now())
             .values_list('id', flat=True)
         )
 

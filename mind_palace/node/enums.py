@@ -11,6 +11,5 @@ class NodeBodyTypeEnum(DjangoChoicesEnum):
 
 class NodeMediaTypeEnum(DjangoChoicesEnum):
 
-    NOT_SET = 'not_set'
-    IMAGE = 'image'
-    YOUTUBE = 'youtube'
+    not_set = 1
+    youtube = 2
