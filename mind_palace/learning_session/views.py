@@ -1,5 +1,8 @@
+from typing import Any
+
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
 from mind_palace.learning_session import filters
@@ -14,7 +17,7 @@ class LearningSessionViewSet(ModelViewSet):
     filterset_class = filters.LearningSessionFilterSet
     permission_classes = [permissions.IsSessionOwner]
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         session = self.get_object()
         if session.is_expired():
             models.UserLearningSession.objects.finish(session)
@@ -45,7 +48,7 @@ class LearningSessionViewSet(ModelViewSet):
         session_data['user'] = request.user.id
         serializer = self.serializer_class(data=session_data)
         serializer.is_valid(raise_exception=True)
-        new_session = serializer.save()
+        new_session = models.UserLearningSession.objects.start(**serializer.validated_data)
         return Response(self.serializer_class(new_session).data)
 
     @action(detail=True, methods=('POST', ))

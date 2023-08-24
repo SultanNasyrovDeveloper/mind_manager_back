@@ -23,9 +23,8 @@ class UserLearningSessionManager(models.Manager):
         """
         targets = session_data.pop('targets')
         session = self.model(**session_data, is_active=True)
-        target_nodes = node_models.PalaceNode.objects.filter(id__in=targets)
         queue_strategy = get_queue_generation_strategy(session.queue_generation_strategy)
-        session.queue = queue_strategy().generate(list(target_nodes))
+        session.queue = queue_strategy().generate(list(targets))
         session.save()
         for target in targets:
             session.targets.add(target)
@@ -92,5 +91,3 @@ class UserLearningSessionManager(models.Manager):
             )
         )
         self.finish_bulk(expired_sessions)
-
-
