@@ -6,5 +6,5 @@ from . import models
 class LearningSessionFilterSet(filters.FilterSet):
 
     class Meta:
-        model = models.UserLearningSession
+        model = models.LearningSession
         exclude = ('queue', 'additional_queue', 'repeated_nodes')

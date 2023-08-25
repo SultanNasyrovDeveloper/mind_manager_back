@@ -1,16 +1,13 @@
-import factory.django as factory
-from faker import Faker
+import factory
+from factory.django import DjangoModelFactory
 
-from mind_palace.node import models
-
-faker = Faker()
+from mind_palace.node.models import PalaceNode
 
 
-class PalaceNodeFactory(factory.DjangoModelFactory):
+class PalaceNodeFactory(DjangoModelFactory):
 
-    user = 1
-    name = faker.pystr()
-    description = faker.pystr()
+    name = factory.Faker('name')
+    description = factory.Faker('paragraph')
 
     class Meta:
-        model = models.PalaceNode
+        model = PalaceNode

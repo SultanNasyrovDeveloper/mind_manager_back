@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from mind_palace.node import models as node_models
 from mind_palace.learning.statistics.models import NodeLearningStatistics
 
 from ..learning.strategy.supermemo2 import SuperMemo2LearningStrategy
@@ -31,21 +30,16 @@ class UserLearningSessionManager(models.Manager):
         return session
 
     def study_node(self, session, **kwargs):
-        """
+        """x
         Handle study node by user.
         """
         node_id = kwargs.pop('node')
         node_learning_stats = NodeLearningStatistics.objects.get(node_id=node_id)
         learning_strategy = SuperMemo2LearningStrategy()
         learning_strategy.study_node(node_learning_stats, **kwargs)
-        session.statistics.average_rating = round((
-            (session.statistics.average_rating * (session.statistics.repetitions - 1) + kwargs.get('rating'))
-            / session.statistics.repetitions if session.statistics.repetitions else 1
-        ), 1)
         session.last_repetition_datetime = timezone.now()
-        if node_id in session.queue_manager:
-            session.queue_manager.remove(node_id)
-        session.repeated_nodes.append(node_id)
+        if node_id in session.queue:
+            session.queue.remove(node_id)
         session.save()
         return session
 

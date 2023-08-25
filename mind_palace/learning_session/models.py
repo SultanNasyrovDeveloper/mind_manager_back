@@ -4,11 +4,11 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 
-from .enums import QueueGenerationStrategiesEnum
+from .enums import QueueGenerationStrategyEnum
 from .managers import UserLearningSessionManager
 
 
-class UserLearningSession(models.Model):
+class LearningSession(models.Model):
     """
     User learning learning_session.
     """
@@ -24,8 +24,8 @@ class UserLearningSession(models.Model):
         related_name='learning_sessions'
     )
     queue_generation_strategy = models.IntegerField(
-        choices=QueueGenerationStrategiesEnum.choices(),
-        default=QueueGenerationStrategiesEnum.outdated_first
+        choices=QueueGenerationStrategyEnum.choices(),
+        default=QueueGenerationStrategyEnum.outdated_first
     )
     queue = ArrayField(models.IntegerField(), default=list)
 
@@ -45,7 +45,7 @@ class UserLearningSession(models.Model):
 class NodeRepetition(models.Model):
 
     session = models.ForeignKey(
-        UserLearningSession,
+        LearningSession,
         on_delete=models.CASCADE,
         related_name='repetitions'
     )

@@ -4,7 +4,8 @@ from mind_palace.node.models import PalaceNode
 from mind_palace.learning_session import models
 from mind_palace.user.models import User
 
-class UserLearningSessionSerializer(serializers.ModelSerializer):
+
+class LearningSessionSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField(read_only=True)
     targets = serializers.PrimaryKeyRelatedField(
@@ -20,7 +21,7 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = models.UserLearningSession
+        model = models.LearningSession
         fields = (
             'id', 'is_active', 'targets', 'user', 'current', 'queue_generation_strategy',
             'start_datetime', 'finish_datetime', 'last_repetition_datetime',
@@ -31,8 +32,8 @@ class UserLearningSessionSerializer(serializers.ModelSerializer):
         )
 
     def get_current(self, session):
-        if type(session) != models.UserLearningSession:
-            session = models.UserLearningSession(
+        if type(session) != models.LearningSession:
+            session = models.LearningSession(
                 **{
                     key: value
                     for key, value
