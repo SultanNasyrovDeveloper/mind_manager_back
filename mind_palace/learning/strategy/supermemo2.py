@@ -1,8 +1,6 @@
-import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
-from typing import Iterable
-
+from django.utils import timezone
 
 from mind_palace.learning.strategy.base import BaseLearningStrategy
 from ..statistics.models import NodeLearningStatistics
@@ -10,23 +8,13 @@ from ..statistics.models import NodeLearningStatistics
 
 class SuperMemo2LearningStrategy(BaseLearningStrategy):
 
-    def generate_queue(self, targets: Iterable) -> list:
-        """
-        Generates ordered list of nodes that can be used as a queue of nodes to repeat.
-        """
-        queue = []
-        for target in targets:
-            queue.extend(list(target.get_descendants(include_self=True).values_list('id', flat=True)))
-        random.shuffle(queue)
-        return queue
-
-    def study_node(self, node_learning_stats: NodeLearningStatistics, rating: float):
+    def study_node(self, node_learning_stats: NodeLearningStatistics, rating: int):
         """
         Handle node repetition using supermemo2 strategy.
 
         https://www.supermemo.com/ru/archives1990-2015/english/ol/sm2
         This is implementation of algorithm described in the link.
-        Repetition strategy calculates optimal next repetition datetime of some data based on
+        Repetition strategy calculates optimal next repetition datetime of some data item based on
         user repetition rating(subjective repetition quality evaluation).
         """
 
@@ -59,7 +47,7 @@ class SuperMemo2LearningStrategy(BaseLearningStrategy):
         node_learning_stats.next_repetition = (
             node_learning_stats.last_repetition + timedelta(days=float(node_learning_stats.interval))
         )
-        node_learning_stats.last_repetition = datetime.utcnow()
+        node_learning_stats.last_repetition = timezone.now()
         node_learning_stats.average_rate = (
             ((node_learning_stats.repetitions * node_learning_stats.average_rate) + rating) /
             (node_learning_stats.repetitions + 1)

@@ -1,0 +1,4 @@
+-r prod.txt
+
+django-stubs==4.2.3
+djangorestframework-stubs==3.14.2

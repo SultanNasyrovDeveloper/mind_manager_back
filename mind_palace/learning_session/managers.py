@@ -22,8 +22,8 @@ class UserLearningSessionManager(models.Manager):
         """
         targets = session_data.pop('targets')
         session = self.model(**session_data, is_active=True)
-        queue_strategy = get_queue_generation_strategy(session.queue_generation_strategy)
-        session.queue = queue_strategy().generate(list(targets))
+        QueueStrategy = get_queue_generation_strategy(session.queue_generation_strategy)
+        session.queue = QueueStrategy().generate(list(targets))
         session.save()
         for target in targets:
             session.targets.add(target)
@@ -73,8 +73,8 @@ class UserLearningSessionManager(models.Manager):
         First filter all learning_session by given query parameters then close all expired learning_session among them.
 
         Args:
-            initial_queryset: Initial sessions queryset.
-            query_params: Django like query params will be put in manager filter method.
+            initial_queryset(QuerySet): Initial sessions queryset.
+            query_params: Django like query params will be passed into manager's filter method.
         """
         initial_queryset = initial_queryset or self.all()
         expired_sessions = initial_queryset.filter(

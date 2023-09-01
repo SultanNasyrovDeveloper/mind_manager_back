@@ -12,7 +12,6 @@ class LearningSession(models.Model):
     """
     User learning learning_session.
     """
-    # basic
     is_active = models.BooleanField(default=False)
     user = models.ForeignKey(
         'user.User', on_delete=models.CASCADE, related_name='learning_sessions',
@@ -29,7 +28,6 @@ class LearningSession(models.Model):
     )
     queue = ArrayField(models.IntegerField(), default=list)
 
-    # time marks
     start_datetime = models.DateTimeField(default=timezone.now)
     finish_datetime = models.DateTimeField(null=True, default=None)
     last_repetition_datetime = models.DateTimeField(default=timezone.now)

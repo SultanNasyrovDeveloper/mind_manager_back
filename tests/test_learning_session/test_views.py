@@ -114,3 +114,5 @@ def test_finish_learning_session(api_client, user):
     url = reverse('learning_session-finish', args=[learning_session.id])
     response = api_client.post(url)
     assert response.status_code == status.HTTP_200_OK
+    finished_session = LearningSession.objects.get(id=learning_session.id)
+    assert not finished_session.is_active
