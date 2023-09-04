@@ -4,10 +4,10 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
-from mind_palace.learning.statistics.models import NodeLearningStatistics
-
-from ..learning.strategy.supermemo2 import SuperMemo2LearningStrategy
-from .queue import get_queue_generation_strategy
+from mind_palace.node.models import PalaceNode
+from ..learning.strategy.supermemo2 import SuperMemo2LearningStrategy, StudyNodeResult
+from .queue import OutdatedFirstQueueGeneration
+from .utils import prepare_node_learning_context
 
 
 class UserLearningSessionManager(models.Manager):
@@ -22,26 +22,20 @@ class UserLearningSessionManager(models.Manager):
         """
         targets = session_data.pop('targets')
         session = self.model(**session_data, is_active=True)
-        QueueStrategy = get_queue_generation_strategy(session.queue_generation_strategy)
-        session.queue = QueueStrategy().generate(list(targets))
+        session.current_node_id = OutdatedFirstQueueGeneration.next(targets)
         session.save()
-        for target in targets:
-            session.targets.add(target)
+        session.targets.set([target.id for target in targets])
         return session
 
-    def study_node(self, session, **kwargs):
+    def study_node(self, node: int, rating: int) -> StudyNodeResult:
         """x
         Handle study node by user.
         """
-        node_id = kwargs.pop('node')
-        node_learning_stats = NodeLearningStatistics.objects.get(node_id=node_id)
+        node = PalaceNode.objects.get(id=node)
+        learning_context = prepare_node_learning_context(node)
         learning_strategy = SuperMemo2LearningStrategy()
-        learning_strategy.study_node(node_learning_stats, **kwargs)
-        session.last_repetition_datetime = timezone.now()
-        if node_id in session.queue:
-            session.queue.remove(node_id)
-        session.save()
-        return session
+        result = learning_strategy.study_node(rating=rating, context=learning_context)
+        return result
 
     def finish(self, session):
         """

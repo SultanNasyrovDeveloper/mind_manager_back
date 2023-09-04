@@ -1,7 +1,3 @@
-from datetime import datetime, timedelta
-
-from django.conf import settings
-from django.utils.timezone import now
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
@@ -26,16 +22,6 @@ class MindPalaceNodeViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, pk, *args, **kwargs):
         node = self.get_queryset().get(id=pk)
-        should_update_views_count = (
-            node.owner_id == request.user.id
-            and now() > node.statistics.last_view + timedelta(
-                minutes=settings.UPDATE_NODE_AFTER_MINUTES
-            )
-        )
-        if should_update_views_count:
-            node.statistics.views += 1
-            node.statistics.last_view = datetime.utcnow()
-            node.statistics.save()
         return Response(self.serializer_class(node).data)
 
     def create(self, request, *args, **kwargs):

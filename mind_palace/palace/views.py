@@ -23,10 +23,8 @@ class UserMindPalaceViewSet(ModelViewSet):
             raise ValidationError('Root must be specified.')
         depth = request.GET.get('depth', 3)
         root_node = PalaceNode.objects.get(id=root_id)
-        subtree_query = (
-            root_node.get_descendants(include_self=True)
-                .filter(level__lt=root_node.level + int(depth))
-                .select_related('statistics')
+        subtree_query = root_node.get_descendants(include_self=True).filter(
+            level__lt=root_node.level + int(depth)
         )
         cached_subtree = subtree_query.get_cached_trees()[0]
         serializer = TreeNodeSerializer(cached_subtree)

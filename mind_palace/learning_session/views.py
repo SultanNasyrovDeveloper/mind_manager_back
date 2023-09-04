@@ -7,7 +7,7 @@ from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 
 from mind_palace.learning_session import filters
-
+from mind_palace.repetition.models import NodeRepetition
 from . import exceptions, models, permissions, serializers
 
 
@@ -20,14 +20,11 @@ class LearningSessionViewSet(ModelViewSet):
 
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         session = self.get_object()
-        if session.is_expired():
-            models.LearningSession.objects.finish(session)
         return Response(self.get_serializer_class()(session).data)
 
     @action(detail=False, methods=('GET', ), url_name='active_session')
     def active_session(self, request, *args, **kwargs):
         response_data = None
-        models.LearningSession.objects.finish_expired(user_id=request.user.id)
         target_session = self.queryset.filter(user=request.user.id, is_active=True).first()
         if target_session:
             response_data = self.serializer_class(target_session).data
@@ -42,7 +39,6 @@ class LearningSessionViewSet(ModelViewSet):
         """
         Start new learning learning_session.
         """
-        models.LearningSession.objects.finish_expired(user_id=request.user.id)
         active_sessions = models.LearningSession.objects.filter(
             is_active=True,
             user_id=request.user.id
@@ -59,11 +55,6 @@ class LearningSessionViewSet(ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(detail=True, methods=('POST', ))
-    def regenerate_queue(self, request, *args, **kwargs):
-        # Run generate queue logic
-        pass
-
     @action(detail=True, methods=('POST', ), url_name='record_repetition')
     def record_repetition(self, request, *args, **kwargs):
         """
@@ -72,8 +63,8 @@ class LearningSessionViewSet(ModelViewSet):
         session = self.get_object()
         serializer = serializers.NodeStudyDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        models.LearningSession.objects.study_node(session, **serializer.validated_data)
-        models.NodeRepetition.objects.create(
+        models.LearningSession.objects.study_node(**serializer.validated_data)
+        NodeRepetition.objects.create(
             session=session,
             node_id=serializer.validated_data.get('node'),
             rating=serializer.validated_data.get('rating'),

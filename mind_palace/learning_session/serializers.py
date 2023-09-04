@@ -12,10 +12,6 @@ class LearningSessionSerializer(serializers.ModelSerializer):
         queryset=PalaceNode.objects.all(),
         many=True
     )
-    current = serializers.SerializerMethodField(
-        read_only=True,
-        method_name='get_current'
-    )
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),
     )
@@ -23,25 +19,13 @@ class LearningSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LearningSession
         fields = (
-            'id', 'is_active', 'targets', 'user', 'current', 'queue_generation_strategy',
-            'start_datetime', 'finish_datetime', 'last_repetition_datetime',
+            'id', 'is_active', 'targets', 'user', 'current_node', 'queue_generation_strategy',
+            'start_datetime', 'finish_datetime'
         )
         read_only_fields = (
-            'id', 'is_active', 'start_datetime', 'finish_datetime', 'last_repetition_datetime',
-            'user', 'current', 'targets'
+            'id', 'is_active', 'start_datetime', 'finish_datetime',
+            'user', 'current_node', 'targets'
         )
-
-    def get_current(self, session):
-        if type(session) != models.LearningSession:
-            session = models.LearningSession(
-                **{
-                    key: value
-                    for key, value
-                    in session.items()
-                    if key not in ('targets', )
-                }
-            )
-        return session.queue[0] if len(session.queue) > 1 else None
 
 
 class NodeStudyDataSerializer(serializers.Serializer):

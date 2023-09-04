@@ -10,4 +10,4 @@ class ActiveSessionAlreadyExistsError(ValidationError):
 
 class SessionExpiredError(ValidationError):
 
-    default_detail = 'Session already expired. You can not perform this action.'
+    default_detail = 'Session expired.'

@@ -1,14 +1,27 @@
-from datetime import timedelta
+from dataclasses import dataclass
+from datetime import timedelta, datetime
+
 from decimal import Decimal
-from django.utils import timezone
 
 from mind_palace.learning.strategy.base import BaseLearningStrategy
-from ..statistics.models import NodeLearningStatistics
+
+
+@dataclass
+class StudyNodeContext:
+    positive_repetitions_in_row: int
+    easiness: Decimal
+    last_repetition: datetime
+
+
+@dataclass
+class StudyNodeResult:
+    easiness: Decimal
+    next_repetition: datetime
 
 
 class SuperMemo2LearningStrategy(BaseLearningStrategy):
 
-    def study_node(self, node_learning_stats: NodeLearningStatistics, rating: int):
+    def study_node(self, rating: int, context: StudyNodeContext) -> StudyNodeResult:
         """
         Handle node repetition using supermemo2 strategy.
 
@@ -17,40 +30,29 @@ class SuperMemo2LearningStrategy(BaseLearningStrategy):
         Repetition strategy calculates optimal next repetition datetime of some data item based on
         user repetition rating(subjective repetition quality evaluation).
         """
-
+        interval = 1
+        result = StudyNodeResult(
+            easiness=context.easiness,
+            next_repetition=context.last_repetition + timedelta(days=1)
+        )
         if rating < 3:  # means user rated this repetition as not positive
-            node_learning_stats.positive_repetitions_in_row = 0
-            node_learning_stats.easiness = node_learning_stats.easiness
-            node_learning_stats.interval = 1
+            result.easiness = context.easiness
 
         else:
             q = rating
-            new_easiness = node_learning_stats.easiness + Decimal(
+            new_easiness = context.easiness + Decimal(
                 (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
             )
-            node_learning_stats.easiness = new_easiness.quantize(Decimal('1.0'))
+            result.easiness = new_easiness.quantize(Decimal('1.0'))
 
-            if node_learning_stats.positive_repetitions_in_row == 0:
-                # if this is first positive repetition repeat this node tomorrow again
-                node_learning_stats.interval = 1
-
-            elif node_learning_stats.positive_repetitions_in_row == 1:
-                # According to supermemo2 must be 6 days
-                node_learning_stats.interval = 4
+            if context.positive_repetitions_in_row == 0:
+                interval = 1  # if this is first positive repetition repeat this node tomorrow again
+            elif context.positive_repetitions_in_row == 1:
+                context.interval = 4  # According to supermemo2 should be 6 days
             else:
-                node_learning_stats.interval = round(
-                    node_learning_stats.interval * node_learning_stats.easiness, 1
-                )
+                interval = round(context.interval * context.easiness, 1)
 
-            node_learning_stats.positive_repetitions_in_row += 1
-
-        node_learning_stats.next_repetition = (
-            node_learning_stats.last_repetition + timedelta(days=float(node_learning_stats.interval))
+        result.next_repetition = (
+            context.last_repetition + timedelta(days=float(interval))
         )
-        node_learning_stats.last_repetition = timezone.now()
-        node_learning_stats.average_rate = (
-            ((node_learning_stats.repetitions * node_learning_stats.average_rate) + rating) /
-            (node_learning_stats.repetitions + 1)
-        )
-        node_learning_stats.repetitions += 1
-        node_learning_stats.save()
+        return result

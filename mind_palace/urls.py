@@ -13,8 +13,6 @@ urlpatterns = [
     path('api/v1/node/', include('mind_palace.node.urls')),
     path('api/v1/palace/', include('mind_palace.palace.urls')),
     path('api/v1/learning/sessions/', include('mind_palace.learning_session.urls')),
-    path('api/v1/learning/statistics/', include('mind_palace.learning.statistics.urls')),
-    path('api/v1/learning/', include('mind_palace.learning.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

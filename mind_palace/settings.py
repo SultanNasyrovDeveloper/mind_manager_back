@@ -39,9 +39,8 @@ INSTALLED_APPS = [
     'mind_palace.palace',
     'mind_palace.node',
     'mind_palace.learning',
-    'mind_palace.learning.statistics',
     'mind_palace.learning_session',
-    # 'mind_palace.learning.config',
+    'mind_palace.repetition',
 ]
 
 smtp_config = config.get('smtp')
